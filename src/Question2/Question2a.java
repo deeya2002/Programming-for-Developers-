@@ -6,97 +6,73 @@ import java.util.*;
 
 public class Question2a {
 
-    // Method to find the greatest common divisor (GCD) of two numbers using Euclid's algorithm
-    public static int gcd(int a, int b) {
-        if (b == 0) {
-            return a;
-        } else {
-            return gcd(b, a % b);
-        }
-    }
-
-    // Method to find the nearest ancestor with relative prime value
-    public static int nearest(int[] values, int[][] edges, int node) {
-        // Base case: If the current node is the root node (i.e., has no parent)
-        if (node == 0) {
-            return -1;
+    public static int[] findNearestAncestors(int[] values, int[][] edges) {
+        // Initialize a map to store the values and their indices
+        Map<Integer, Integer> valueIndices = new HashMap<>();
+        for (int i = 0; i < values.length; i++) {
+            valueIndices.put(values[i], i);
         }
 
-        int parent = -1;
-        int gcdValue = 0;
+        // Initialize an array to store the nearest ancestor for each node
+        int[] nearestAncestors = new int[values.length];
 
-        // Traverse the path from the current node to the root node
-        while (node != 0 && gcdValue != 1) {
-            // Find the parent of the current node
-            for (int i = 0; i < edges.length; i++) {
-                if (edges[i][1] == node) {
-                    parent = edges[i][0];
+        // For each node, find its nearest ancestor that has a relatively prime value
+        for (int i = 0; i < values.length; i++) {
+            nearestAncestors[i] = -1; // initialize to -1
+
+            // Starting from the node itself, traverse the tree upwards to find its nearest ancestor
+            int current = i;
+            while (current != -1) {
+                // Check if the current node's value is relatively prime to the value of the original node
+                if (gcd(values[current], values[i]) == 1) {
+                    nearestAncestors[i] = current; // store the nearest ancestor and break out of the loop
                     break;
                 }
+                current = getParent(current, edges); // move to the parent node
             }
-            gcdValue = gcd(values[node], values[parent]);
-            node = parent;
         }
 
-        if (gcdValue == 1) {
-            return parent;
-        } else {
-            return -1;
+        // Find the indices of nodes that have non-relative-prime ancestors
+        Set<Integer> nonRelativePrimeAncestors = new HashSet<>();
+        for (int i = 0; i < values.length; i++) {
+            int ancestor = nearestAncestors[i];
+            while (ancestor != -1) {
+                if (gcd(values[i], values[ancestor]) != 1) {
+                    nonRelativePrimeAncestors.add(ancestor);
+                }
+                ancestor = nearestAncestors[ancestor];
+            }
         }
+
+        // Set the nearest ancestor of nodes with non-relative-prime ancestors to -1
+        for (int i : nonRelativePrimeAncestors) {
+            nearestAncestors[i] = -1;
+        }
+
+        return nearestAncestors;
     }
 
-    // Main method to find the nearest ancestors for all nodes
-    public static int[] nearestAncestors(int[] values, int[][] edges) {
-        int n = values.length;
-        int[] result = new int[n];
-        Arrays.fill(result, -1);
-
-        // Iterate over all nodes and find their nearest ancestor with relative prime value
-        for (int i = 0; i < n; i++) {
-            result[i] = nearest(values, edges, i);
-        }
-
-        return result;
+    // Helper method to compute the greatest common divisor of two integers
+    private static int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
     }
 
-    // Main method to test the solution
+    // Helper method to get the parent node of a given node
+    private static int getParent(int node, int[][] edges) {
+        for (int[] edge : edges) {
+            if (edge[1] == node) {
+                return edge[0];
+            }
+        }
+        return -1; // node is the root
+    }
+
     public static void main(String[] args) {
         int[] values = {3, 2, 6, 6, 4, 7, 12};
         int[][] edges = {{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}, {2, 6}};
-        int[] result = nearestAncestors(values, edges);
 
-        // Print the result
+        int[] result = Question2a.findNearestAncestors(values, edges);
+
         System.out.println(Arrays.toString(result));
     }
 }
-//class Solution {
-//    public int gcd(int n1, int n2) {
-//        if (n2 == 0) {
-//            return n1;
-//        }
-//        return gcd(n2, n1 % n2);
-//    }
-//
-//    public void dfs(int[] nums, LinkedList<Integer>[] tree, int depth, int node, boolean[] visited, int[] ans, Map<Integer, int[]> map, boolean[][] poss) {
-//        if (visited[node]) return;
-//        visited[node] = true;
-//        int ancestor = -1;
-//        int d = Integer.MAX_VALUE;
-//        for (int i = 1; i < 51; i++) {
-//            if (poss[nums[node]][i] && map.containsKey(i)) {
-//                if (depth - map.get(i)[0] <= d) {
-//                    d = depth - map.get(i)[0];
-//                    ancestor = map.get(i)[1];
-//                }
-//            }
-//        }
-//        ans[node] = ancestor;
-//        int[] exist = (map.containsKey(nums[node])) ? map.get(nums[node]) : new int[]{-1, -1};
-//        map.put(nums[node], new int[]{depth, node});
-//        for (int child : tree[node]) {
-//            if (visited[child]) continue;
-//            dfs();
-//        }
-//    }
-//}
-//2a

@@ -16,8 +16,8 @@ public class Question7b {
         List<Future<String>> results = new ArrayList<>(); // list to store results from each thread
 
         // submit tasks to executor service
-        for (int i = 0; i < 100; i++) {
-            results.add(executorService.submit(new CrawlTask("https://www.canva.com/" + i)));
+        for (int i = 0; i < 50; i++) {
+            results.add(executorService.submit(new CrawlTask("https://www.instagram.com/" + i)));
         }
 
         // wait for all tasks to finish and collect results
